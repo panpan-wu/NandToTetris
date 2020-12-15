@@ -17,4 +17,21 @@ CHIP PC {
 
     PARTS:
     // Put your code here:
+    // Solution 1
+    // Mux16(a=in, b=mux1out, sel=sel0, out=mux0out);
+    // Register(in=mux0out, load=load0, out=out, out=registerout);
+    // Inc16(in=registerout, out=incout);
+    // Mux16(a=incout, b=false, sel=reset, out=mux1out);
+    // Not(in=load, out=notload);
+    // Or(a=reset, b=load, out=or0out);
+    // Or(a=or0out, b=inc, out=load0);
+    // And(a=notload, b=inc, out=and0out);
+    // Or(a=and0out, b=reset, out=sel0);
+
+    // Solution 2
+    Inc16(in=t0, out=t1);
+    Mux16(a=t0, b=t1, sel=inc, out=t2);
+    Mux16(a=t2, b=in, sel=load, out=t3);
+    Mux16(a=t3, b=false, sel=reset, out=t4);
+    Register(in=t4, load=true, out=t0, out=out);
 }

@@ -1,7 +1,7 @@
 # NandToTetris
 
-官网：[https://www.nand2tetris.org](https://www.nand2tetris.org)
-课程地址：[https://www.coursera.org/learn/build-a-computer/home/welcome](https://www.coursera.org/learn/build-a-computer/home/welcome)
+- 官网：[https://www.nand2tetris.org](https://www.nand2tetris.org)
+- 课程地址：[https://www.coursera.org/learn/build-a-computer/home/welcome](https://www.coursera.org/learn/build-a-computer/home/welcome)
 
 ## Boolean functions and gate logic
 
@@ -29,4 +29,4 @@ Any boolean function can be represented using an expression containing NAND oper
 **De Morgan laws**
 
 - not(x and y) = not(x) or not(y)
-- not(x or y) = nnot(x) and not(y)
+- not(x or y) = not(x) and not(y)
