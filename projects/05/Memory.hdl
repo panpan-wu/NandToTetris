@@ -28,4 +28,10 @@ CHIP Memory {
 
     PARTS:
     // Put your code here:
+    RAM16K(in=in, address=address[0..13], load=RAM16KLoad, out=RAM16KOut);
+    RAM16K(in=in, address[0..12]=address[0..12], address[13]=false, load=ScreenLoad, out=ScreenOut);
+    Register(in=in, load=RegisterLoad, out=RegisterOut);
+    DMux4Way(in=load, sel=address[13..14], a=a, b=b, c=ScreenLoad, d=RegisterLoad);
+    Mux(a=a, b=b, sel=address[13], out=RAM16KLoad);
+    Mux4Way16(a=RAM16KOut, b=RAM16KOut, c=ScreenOut, d=RegisterOut, sel=address[13..14], out=out);
 }

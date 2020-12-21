@@ -40,4 +40,131 @@ CHIP CPU {
 
     PARTS:
     // Put your code here:
+    Not(in=instruction[15], out=notI15);
+
+    // Mux0
+    // in: instruction
+    Mux16(a=ALUOut, b=instruction, sel=notI15, out=Mux0Out);
+    
+    // A
+    // out: addressM
+    ARegister(in=Mux0Out, load=ALoad, out=AOut, out[0..14]=addressM);
+    Or(a=notI15, b=instruction[5], out=ALoad);
+
+    // Mux1
+    // in: inM
+    Mux16(a=AOut, b=inM, sel=instruction[12], out=Mux1Out);
+
+    // D
+    DRegister(in=ALUOut, load=DLoad, out=DOut);
+    And(a=instruction[4], b=instruction[15], out=DLoad);
+
+    // ALU
+    // out: outM
+    ALU(
+        x=DOut,
+        y=Mux1Out,
+        zx=instruction[11],
+        nx=instruction[10],
+        zy=instruction[9],
+        ny=instruction[8],
+        f=instruction[7],
+        no=instruction[6],
+        out=outM,
+        out=ALUOut,
+        zr=zr,
+        ng=ng
+    );
+
+    // PC
+    // in: reset
+    // out: pc
+    PC(
+        in=AOut,
+        load=PCLoad,
+        inc=true,
+        reset=reset,
+        out[0..14]=pc
+    );
+    // Solution 1:
+    // I15 -> instruction[15]
+    // I2 -> instruction[2]
+    // I1 -> instruction[1]
+    // I0 -> instruction[0]
+    // PCLoad:
+    //     I15 and (
+    //         (not(I2) and not(I1) and I0 and not(zr) and not(ng)) or
+    //         (not(I2) and I1 and not(I0) and zr and not(ng)) or
+    //         (not(I2) and I1 and I0 and not(ng)) or
+    //         (I2 and not(I1) and not(I0) and not(zr) and ng) or
+    //         (I2 and not(I1) and I0 and not(zr)) or
+    //         (I2 and I1 and not(I0) and (zr xor ng)) or
+    //         (I2 and I1 and I0)
+    //     )
+    // g -> gate out
+    // Not(in=instruction[0], out=notI0);
+    // Not(in=instruction[1], out=notI1);
+    // Not(in=instruction[2], out=notI2);
+    // Not(in=zr, out=notzr);
+    // Not(in=ng, out=notng);
+
+    // And(a=notI2, b=notI1, out=g00);
+    // And(a=g00, b=instruction[0], out=g01);
+    // And(a=g01, b=notzr, out=g02);
+    // And(a=g02, b=notng, out=g0);
+
+    // And(a=notI2, b=instruction[1], out=g10);
+    // And(a=g10, b=notI0, out=g11);
+    // And(a=g11, b=zr, out=g12);
+    // And(a=g12, b=notng, out=g1);
+
+    // And(a=notI2, b=instruction[1], out=g20);
+    // And(a=g20, b=instruction[0], out=g21);
+    // And(a=g21, b=notng, out=g2);
+
+    // And(a=instruction[2], b=notI1, out=g30);
+    // And(a=g30, b=notI0, out=g31);
+    // And(a=g31, b=notzr, out=g32);
+    // And(a=g32, b=ng, out=g3);
+
+    // And(a=instruction[2], b=notI1, out=g40);
+    // And(a=g40, b=instruction[0], out=g41);
+    // And(a=g41, b=notzr, out=g4);
+
+    // And(a=instruction[2], b=instruction[1], out=g50);
+    // And(a=g50, b=notI0, out=g51);
+    // Xor(a=zr, b=ng, out=g52);
+    // And(a=g51, b=g52, out=g5);
+
+    // And(a=instruction[2], b=instruction[1], out=g60);
+    // And(a=g60, b=instruction[0], out=g6);
+
+    // Or(a=g0, b=g1, out=or0);
+    // Or(a=or0, b=g2, out=or1);
+    // Or(a=or1, b=g3, out=or2);
+    // Or(a=or2, b=g4, out=or3);
+    // Or(a=or3, b=g5, out=or4);
+    // Or(a=or4, b=g6, out=or5);
+
+    // And(a=instruction[15], b=or5, out=PCLoad);
+
+    // Solution 2:
+    // instruction[2] and ng -> jlt
+    // instruction[1] and zr -> jeq
+    // instruction[0] and (not(ng) and not(zr))-> jgt
+    Not(in=ng, out=notng);
+    Not(in=zr, out=notzr);
+    And(a=notng, b=notzr, out=pos);
+
+    And(a=instruction[2], b=ng, out=jlt);
+    And(a=instruction[1], b=zr, out=jeq);
+    And(a=instruction[0], b=pos, out=jgt);
+
+    Or(a=jlt, b=jeq, out=or0);
+    Or(a=or0, b=jgt, out=j);
+
+    And(a=j, b=instruction[15], out=PCLoad);
+
+    // out: writeM
+    And(a=instruction[15], b=instruction[3], out=writeM);
 }
